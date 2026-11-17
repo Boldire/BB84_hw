@@ -41,7 +41,9 @@
             this.labelStepDescription = new System.Windows.Forms.Label();
             this.labelResult = new System.Windows.Forms.Label();
             this.dgvSimulation = new System.Windows.Forms.DataGridView();
+            this.numEavesDropper = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSimulation)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numEavesDropper)).BeginInit();
             this.SuspendLayout();
             // 
             // chkEavesActive
@@ -56,7 +58,7 @@
             // 
             // btnGenerate
             // 
-            this.btnGenerate.Location = new System.Drawing.Point(127, 21);
+            this.btnGenerate.Location = new System.Drawing.Point(158, 21);
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(179, 23);
             this.btnGenerate.TabIndex = 1;
@@ -84,7 +86,7 @@
             // 
             // txtSenderBits
             // 
-            this.txtSenderBits.Location = new System.Drawing.Point(22, 95);
+            this.txtSenderBits.Location = new System.Drawing.Point(22, 133);
             this.txtSenderBits.Name = "txtSenderBits";
             this.txtSenderBits.Size = new System.Drawing.Size(100, 20);
             this.txtSenderBits.TabIndex = 4;
@@ -92,7 +94,7 @@
             // labelSenderBits
             // 
             this.labelSenderBits.AutoSize = true;
-            this.labelSenderBits.Location = new System.Drawing.Point(19, 70);
+            this.labelSenderBits.Location = new System.Drawing.Point(19, 108);
             this.labelSenderBits.Name = "labelSenderBits";
             this.labelSenderBits.Size = new System.Drawing.Size(58, 13);
             this.labelSenderBits.TabIndex = 5;
@@ -100,7 +102,7 @@
             // 
             // txtSenderBases
             // 
-            this.txtSenderBases.Location = new System.Drawing.Point(202, 95);
+            this.txtSenderBases.Location = new System.Drawing.Point(174, 133);
             this.txtSenderBases.Name = "txtSenderBases";
             this.txtSenderBases.Size = new System.Drawing.Size(100, 20);
             this.txtSenderBases.TabIndex = 6;
@@ -108,7 +110,7 @@
             // labelSenderBases
             // 
             this.labelSenderBases.AutoSize = true;
-            this.labelSenderBases.Location = new System.Drawing.Point(199, 70);
+            this.labelSenderBases.Location = new System.Drawing.Point(171, 108);
             this.labelSenderBases.Name = "labelSenderBases";
             this.labelSenderBases.Size = new System.Drawing.Size(69, 13);
             this.labelSenderBases.TabIndex = 7;
@@ -116,7 +118,7 @@
             // 
             // txtRecieverBases
             // 
-            this.txtRecieverBases.Location = new System.Drawing.Point(354, 95);
+            this.txtRecieverBases.Location = new System.Drawing.Point(321, 133);
             this.txtRecieverBases.Name = "txtRecieverBases";
             this.txtRecieverBases.Size = new System.Drawing.Size(100, 20);
             this.txtRecieverBases.TabIndex = 8;
@@ -124,7 +126,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(351, 70);
+            this.label1.Location = new System.Drawing.Point(318, 108);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(67, 13);
             this.label1.TabIndex = 9;
@@ -156,17 +158,31 @@
             this.dgvSimulation.AllowUserToDeleteRows = false;
             this.dgvSimulation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSimulation.ColumnHeadersVisible = false;
-            this.dgvSimulation.Location = new System.Drawing.Point(127, 203);
+            this.dgvSimulation.Location = new System.Drawing.Point(210, 247);
             this.dgvSimulation.Name = "dgvSimulation";
             this.dgvSimulation.ReadOnly = true;
             this.dgvSimulation.Size = new System.Drawing.Size(240, 150);
             this.dgvSimulation.TabIndex = 12;
+            // 
+            // numEavesDropper
+            // 
+            this.numEavesDropper.Increment = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            this.numEavesDropper.Location = new System.Drawing.Point(22, 48);
+            this.numEavesDropper.Name = "numEavesDropper";
+            this.numEavesDropper.ReadOnly = true;
+            this.numEavesDropper.Size = new System.Drawing.Size(120, 20);
+            this.numEavesDropper.TabIndex = 15;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1328, 786);
+            this.Controls.Add(this.numEavesDropper);
             this.Controls.Add(this.dgvSimulation);
             this.Controls.Add(this.labelResult);
             this.Controls.Add(this.labelStepDescription);
@@ -184,6 +200,7 @@
             this.Text = "BB84 Szimulátor";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSimulation)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numEavesDropper)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -204,6 +221,7 @@
         private System.Windows.Forms.Label labelStepDescription;
         private System.Windows.Forms.Label labelResult;
         private System.Windows.Forms.DataGridView dgvSimulation;
+        private System.Windows.Forms.NumericUpDown numEavesDropper;
     }
 }
 

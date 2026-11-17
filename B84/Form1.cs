@@ -26,5 +26,10 @@ namespace B84
         {
 
         }
+
+        private void trckEavesDropper_Scroll(object sender, EventArgs e)
+        {
+
+        }
     }
 }
