@@ -8,6 +8,6 @@ namespace BB84
 {
     internal class BB84Simulation
     {
-
+       
     }
 }

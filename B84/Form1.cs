@@ -21,5 +21,10 @@ namespace B84
         {
 
         }
+
+        private void Véletlengenerálás_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
