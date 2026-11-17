@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace B84
+namespace BB84
 {
     internal class BB84Simulation
     {
