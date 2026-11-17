@@ -42,8 +42,11 @@
             this.labelResult = new System.Windows.Forms.Label();
             this.dgvSimulation = new System.Windows.Forms.DataGridView();
             this.numEavesDropper = new System.Windows.Forms.NumericUpDown();
+            this.numBitCount = new System.Windows.Forms.NumericUpDown();
+            this.labelNumBits = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSimulation)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numEavesDropper)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBitCount)).BeginInit();
             this.SuspendLayout();
             // 
             // chkEavesActive
@@ -58,7 +61,7 @@
             // 
             // btnGenerate
             // 
-            this.btnGenerate.Location = new System.Drawing.Point(158, 21);
+            this.btnGenerate.Location = new System.Drawing.Point(488, 14);
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(179, 23);
             this.btnGenerate.TabIndex = 1;
@@ -68,7 +71,7 @@
             // 
             // btnNextStep
             // 
-            this.btnNextStep.Location = new System.Drawing.Point(356, 21);
+            this.btnNextStep.Location = new System.Drawing.Point(686, 14);
             this.btnNextStep.Name = "btnNextStep";
             this.btnNextStep.Size = new System.Drawing.Size(165, 23);
             this.btnNextStep.TabIndex = 2;
@@ -77,7 +80,7 @@
             // 
             // btnRunAll
             // 
-            this.btnRunAll.Location = new System.Drawing.Point(584, 19);
+            this.btnRunAll.Location = new System.Drawing.Point(914, 12);
             this.btnRunAll.Name = "btnRunAll";
             this.btnRunAll.Size = new System.Drawing.Size(109, 23);
             this.btnRunAll.TabIndex = 3;
@@ -177,11 +180,44 @@
             this.numEavesDropper.Size = new System.Drawing.Size(120, 20);
             this.numEavesDropper.TabIndex = 15;
             // 
+            // numBitCount
+            // 
+            this.numBitCount.Location = new System.Drawing.Point(210, 48);
+            this.numBitCount.Maximum = new decimal(new int[] {
+            32,
+            0,
+            0,
+            0});
+            this.numBitCount.Minimum = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            this.numBitCount.Name = "numBitCount";
+            this.numBitCount.Size = new System.Drawing.Size(98, 20);
+            this.numBitCount.TabIndex = 16;
+            this.numBitCount.Value = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            // 
+            // labelNumBits
+            // 
+            this.labelNumBits.AutoSize = true;
+            this.labelNumBits.Location = new System.Drawing.Point(207, 25);
+            this.labelNumBits.Name = "labelNumBits";
+            this.labelNumBits.Size = new System.Drawing.Size(64, 13);
+            this.labelNumBits.TabIndex = 17;
+            this.labelNumBits.Text = "Bitek száma";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1328, 786);
+            this.Controls.Add(this.labelNumBits);
+            this.Controls.Add(this.numBitCount);
             this.Controls.Add(this.numEavesDropper);
             this.Controls.Add(this.dgvSimulation);
             this.Controls.Add(this.labelResult);
@@ -201,6 +237,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSimulation)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numEavesDropper)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBitCount)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -222,6 +259,8 @@
         private System.Windows.Forms.Label labelResult;
         private System.Windows.Forms.DataGridView dgvSimulation;
         private System.Windows.Forms.NumericUpDown numEavesDropper;
+        private System.Windows.Forms.NumericUpDown numBitCount;
+        private System.Windows.Forms.Label labelNumBits;
     }
 }
 
