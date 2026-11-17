@@ -1,13 +1,373 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace B84
+﻿namespace BB84
 {
     internal class BB84Simulation
     {
-       
+        int stepCount;
+
+        //küldő
+        private SimulatedUser alice;
+        //fogadó
+        private SimulatedUser bob;
+
+        private Channel channel;
+
+        bool eavesdropping;
+
+        int numCount;
+
+        float maxErrorRate;
+
+        Random centralRnd;
+
+        public BB84Simulation()
+        {
+            centralRnd = new Random();
+            stepCount = 0;
+            alice = new SimulatedUser(centralRnd);
+            bob = new SimulatedUser(centralRnd);
+            channel = new Channel(centralRnd);
+            eavesdropping = false;
+            numCount = 100;
+            maxErrorRate = 0.20f;
+        }
+
+        public void NextStep()
+        {
+            switch (stepCount)
+            {
+                case 0:
+                    //Alice generál magának X bitet és X mérési alapot
+                    alice.GenerateStuffs(numCount);
+                    break;
+                case 1:
+                    //Alice elküldi a qubitokat
+                    List<MyQubit> qubits = alice.GeneratedQubits();
+                    channel.TransmitQubits(qubits);
+                    break;
+                case 2:
+                    if (eavesdropping)
+                    {
+                        //Eve lehallgatja a qubitok egy részét
+                        channel.ApplyEve();
+                    }
+                    else
+                    {
+                        //ha be lenne kapcsolva a lehallgatás, az itt történne
+                    }
+                    break;
+                case 3:
+                    //Bob generál magának X mérési alapot
+                    bob.GenerateBases(numCount);
+                    //Bob megkapja a qubitokat (ezek lehet, hogy le lettek hallgatva Eve által)
+                    qubits = channel.RecieveQubits(); 
+                    bob.MeasureQubits(qubits);
+                    break;
+                case 4:
+                    List<int> sharedBases = channel.SharedBases(alice.GetBases(), bob.GetBases());
+                    //Alice és Bob egyeztetik az alapjaikat és az eltérő alapokat eldobják
+                    //Ekkor a megtartott és nem lehallgatott bitek megegyeznek mindkét oldalon (feltételezve, hogy nincsen zaj)
+                    alice.Sifting(sharedBases);
+                    bob.Sifting(sharedBases);
+                    break;
+                case 5:
+                    //kiválasztunk Y% véletlen bitet
+                    List<int> validatorBits = alice.SelectRandomBits(40);
+                    List<int> alicePublicBits = alice.QBERSelect(validatorBits);
+                    List<int> bobPublicBits = bob.QBERSelect(validatorBits);
+                    float QBER = channel.CheckQBER(alicePublicBits,bobPublicBits);
+                    if (QBER > maxErrorRate)
+                    { 
+                        //megáll az algoritmus és újra kell kezdenünk
+                        stepCount = -1; 
+                    }
+                    break;
+                case 6:
+
+                    break;
+                case 7:
+
+                    break;
+                default:
+                    //végére értünk, megáll a szimuláció
+                    break;
+            }
+            if (stepCount != -1)
+            {
+                stepCount++; 
+            }
+        }
+
+        public void ResetSimultaion()
+        {
+            stepCount = 0;
+            alice = new SimulatedUser(centralRnd);
+            bob = new SimulatedUser(centralRnd);
+            channel = new Channel(centralRnd);
+        }
+
+        public void SetEavesdropping(bool newEavesdropping)
+        {
+            eavesdropping = newEavesdropping;
+        }
+    }
+
+    internal class Channel
+    {
+        //A lehallgató fél a qubitok hány százalékát méri meg?
+        private int eve;
+        Random rnd;
+
+        List<MyQubit> transmission;
+
+        public Channel(Random centralRnd)
+        {
+            eve = 0;
+            rnd = centralRnd;
+        }
+
+        public void SetEve(int newEve)
+        {
+            eve = newEve;
+        }
+
+        public void TransmitQubits(List<MyQubit> qubits)
+        {
+            transmission = qubits;
+        }
+
+        public List<MyQubit> RecieveQubits()
+        {
+            return transmission;
+        }
+
+        public void ApplyEve()
+        {
+            //a lehallgató (Eve) a közvetített qubitok [eve]%-át hallgatja le
+            List<int> eavesdropped = new List<int>();
+            //ennyi qubitot célunk lehallgatni
+            int targetCount = (int)((eve / 100.0f) * transmission.Count);
+            while (eavesdropped.Count != targetCount)
+            {
+                //kiválasztunk egy véletlen qubitot
+                int nextEavesdrop = rnd.Next(0, transmission.Count);
+                string selectedBase;
+                if (!eavesdropped.Contains(nextEavesdrop))
+                {
+                    //ha a qubitot még nem hallgattuk le, választunk egy véletlen alapot
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        selectedBase = "D";
+                    }
+                    else
+                    {
+                        selectedBase = "R";
+                    }
+                    /*  a lehallgatott qubitnak Eve nem ismeri az alapját
+                     *  Eve-nek van egy 50%-os esélye véletlenül eltalálni az alapot
+                     *  Hibás alap esetén a qubit állapota megváltozik
+                     *  Bob a hibás értékű qubitnak 50% eséllyel ismételten megváltoztatja az értékét
+                     *  Ez azt jelenti, hogy a végső kiolvasott bitnek 50%*50%=25% esélye van, hogy eltér az Alice által küldött bit-től
+                     */
+                    transmission[nextEavesdrop].GetValue(selectedBase);
+                    eavesdropped.Add(nextEavesdrop);
+                }
+            }
+        }
+
+        public List<int> SharedBases(List<string> aliceBases, List<string> bobBases)
+        {
+            List<int> output = new List<int>();
+            //összehasonlítjuk Alice és Bob mérési alapjait és megtartjuk a megegyezőket
+            for (int i=0; i<aliceBases.Count; i++)
+            {
+                if (aliceBases[i].Equals(bobBases[i]))
+                {
+                    output.Add(i); 
+                }
+            }
+            return output;
+        }
+
+        public float CheckQBER(List<int> validatorBitsA, List<int> validatorBitsB)
+        {
+            int correct = 0;
+            int incorrect = 0;
+            for (int i = 0; i<validatorBitsA.Count; i++) 
+            {
+                if (validatorBitsA[i] == validatorBitsB[i])
+                { 
+                    correct++; 
+                }
+                else
+                {
+                    incorrect++;
+                }
+            }
+            return (float)incorrect / (incorrect+correct);
+        }
+    }
+
+    internal class SimulatedUser
+    {
+        //itt tároljuk akár a véletlenül generált, akár a mérés eredményeként kapott biteket (0 és 1)
+        List<int> bits;
+        //itt tároljuk akár a véletlenül generált, akár a mérés eredményeként kapott mérési alapokat (D és R)
+        List<string> bases;
+        
+        private Random rnd;
+
+        public SimulatedUser(Random centralRnd)
+        {
+            bits = new List<int>();
+            bases = new List<string>();
+            rnd = centralRnd;
+        }
+
+        public List<MyQubit> GeneratedQubits()
+        {
+            List<MyQubit> output = new List<MyQubit>();
+            for(int i = 0; i < bits.Count; i++)
+            {
+                output.Add(new MyQubit(bits[i], bases[i],rnd));
+            }
+            return output;
+        }
+
+        public void GenerateStuffs(int count)
+        {
+            GenerateBits(count);
+            GenerateBases(count);
+        }
+        
+        private void GenerateBits(int count)
+        {
+            for (int i=0; i<count; i++)
+            {
+                bits.Add(rnd.Next(0,2));
+            }
+        }
+
+        public void GenerateBases(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (rnd.Next(0, 2) == 0)
+                    bases.Add("D");
+                else
+                    bases.Add("R");
+            }
+        }
+
+        public void MeasureQubits(List<MyQubit> qubits)
+        {
+            bits = new List<int>();
+            for (int i=0; i<qubits.Count; i++)
+            {
+                bits.Add(qubits[i].GetValue(bases[i]));
+            }
+        }
+
+        public List<int> GetBits()
+        {
+            return bits;
+        }
+
+        public List<string> GetBases()
+        {
+            return bases;
+        }
+
+        public void SetBits(List<int> newBits)
+        {
+            bits = newBits;
+        }
+
+        public void SetBases(List<string> newBases)
+        {
+            bases = newBases;
+        }
+
+        public void Sifting(List<int> shared)
+        {
+            List<int> newBits = new List<int>();
+            List<string> newBases = new List<string>();
+            foreach (int i in shared)
+            {
+                newBits.Add(bits[i]);
+                newBases.Add(bases[i]);
+            }
+            bits = newBits;
+            bases = newBases;
+        }
+
+        public List<int> SelectRandomBits(int targetPercent)
+        {
+            List<int> output = new List<int>();
+            int targetCount = (int)((targetPercent / 100.0f) * (bases.Count));
+
+            while (output.Count != targetCount)
+            {
+                int newNum = rnd.Next(0,bases.Count);
+                if (!output.Contains(newNum))
+                    output.Add(newNum);
+            }
+
+            return output;
+        }
+
+        public List<int> QBERSelect(List<int> publicList)
+        {
+            List<int> output = new List<int>();
+            foreach (int i in publicList)
+            {
+                output.Add(bits[i]);
+            }
+
+            //a publikusan megoszotott biteket eldobjuk
+            List<int> newBits = new List<int>();
+            List<string> newBases = new List<string>();
+            for (int i=0; i<bases.Count; i++)
+            {
+                if (!publicList.Contains(i))
+                {
+                    newBits.Add(bits[i]);
+                    newBases.Add(bases[i]);
+                }
+            }
+            bits = newBits;
+            bases = newBases;
+
+            return output;
+        }
+    }
+
+    internal class MyQubit
+    {
+        private int storedBit;
+        private string storedBase;
+
+        Random rnd;
+
+        public MyQubit(int bit, string mBase,Random centralRnd) 
+        {
+            storedBit = bit;
+            storedBase = mBase;
+            rnd = centralRnd;
+        }
+
+        public int GetValue(string mBase)
+        {
+            if (storedBase.Equals(mBase))
+            {
+                //egyező alap esetén semmi sem történik, az érték nem változik
+            }
+            else
+            {
+                //eltérő alap esetén a qubit értéke változik
+                storedBit = rnd.Next(0, 2);
+                storedBase = mBase;
+            }
+            return storedBit;
+        }
     }
 }
