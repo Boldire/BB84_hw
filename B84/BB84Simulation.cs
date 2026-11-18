@@ -85,10 +85,25 @@ namespace BB84
                     }
                     break;
                 case 6:
-
+                    //az két felhasználónál tárolt biteket össze kell hasonlítanunk, és a hibákat javítanunk kell
+                    channel.CascadeParityCheck(alice,bob);
                     break;
                 case 7:
-
+                    //ha végeztünk a hiba- kereső és javító algoritmussal, még mindig lehetnek hibák a bitek között
+                    //mindkét felhasználó hash-el a bitjeit
+                    if (alice.BitHashing().Equals(bob.BitHashing()))
+                    {
+                        //minden rendben, a két bitsor szinte biztosan egyezik (két eltérő bitsor adhat azonos hash-t, de ennek esélyét gyakorlatilag vehetjük nullának)
+                    }
+                    else
+                    {
+                        //valami nagyon félrement, leállunk, újra kell kezdeni az algoritmust
+                        stepCount = -1;
+                    }
+                    break;
+                case 8:
+                    //kész vagyunk, a kapott bitsorok egyeznek
+                    List<int> finalBits = alice.GetBits(); 
                     break;
                 default:
                     //végére értünk, megáll a szimuláció
@@ -208,6 +223,25 @@ namespace BB84
             }
             return (float)incorrect / (incorrect+correct);
         }
+
+        public void CascadeParityCheck(SimulatedUser userA, SimulatedUser userB)
+        {
+            //ezt majd később el kéne távolítani
+            //most csak úgy teszünk, mintha lenne egy hibaellenőrzés
+            if (rnd.Next(0,30)==0)
+            {
+                //ha megütjük az 1/30 esélyt, nem csinálunk semmit
+                return;
+            }
+            else
+            {
+                //amúgy meg úgy teszünk, mintha megtaláltuk volna a hibákat és kijavítottuk őket 
+                userB.SetBits(userA.GetBits);
+            }
+        
+            //TODO: eltérő groupSize és eltérő sorrend generálása
+            //TODO: userA.RangeParity és userB.RangeParity
+        }
     }
 
     internal class SimulatedUser
@@ -305,6 +339,10 @@ namespace BB84
 
         public List<int> SelectRandomBits(int targetPercent)
         {
+            if (targetPercent>100)
+            {
+                targetPercent = 100;
+            }
             List<int> output = new List<int>();
             int targetCount = (int)((targetPercent / 100.0f) * (bases.Count));
 
@@ -341,6 +379,25 @@ namespace BB84
             bases = newBases;
 
             return output;
+        }
+
+        public List<int> RangeParity(int groupSize, List<int> orderList)
+        {
+            List<int> output = new List<int>();
+            //csak egy alternatív sorrendje a bitlistának
+            List<int> dummyList = new List<int>();
+            foreach(int i in orderList)
+            {
+                dummyList.Add(bits[i]);
+            }
+            //TODO: groupSize méretű csoportokra bontva megnézzük a parítását dummyList-nek
+            return output;
+        }
+
+        public string BitHashing()
+        {
+            //TODO: a felhasználónál tárolt biteket hash-elő algoritmusba helyezzük és a kimenetet továbbadjuk
+            return "yo";
         }
     }
 
