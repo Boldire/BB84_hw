@@ -38,8 +38,8 @@
             this.labelSenderBases = new System.Windows.Forms.Label();
             this.txtRecieverBases = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.labelStepDescription = new System.Windows.Forms.Label();
-            this.labelResult = new System.Windows.Forms.Label();
+            this.lblStepDescription = new System.Windows.Forms.Label();
+            this.lblResult = new System.Windows.Forms.Label();
             this.dgvSimulation = new System.Windows.Forms.DataGridView();
             this.numEavesDropper = new System.Windows.Forms.NumericUpDown();
             this.numBitCount = new System.Windows.Forms.NumericUpDown();
@@ -135,25 +135,25 @@
             this.label1.TabIndex = 9;
             this.label1.Text = "Vevő bázisai";
             // 
-            // labelStepDescription
+            // lblStepDescription
             // 
-            this.labelStepDescription.AutoSize = true;
-            this.labelStepDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelStepDescription.Location = new System.Drawing.Point(485, 70);
-            this.labelStepDescription.Name = "labelStepDescription";
-            this.labelStepDescription.Size = new System.Drawing.Size(399, 13);
-            this.labelStepDescription.TabIndex = 10;
-            this.labelStepDescription.Text = "Állapot: Készen áll. Nyomd meg a \'Következő lépés\' vagy a \'Teljes futtatás\' gombo" +
+            this.lblStepDescription.AutoSize = true;
+            this.lblStepDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblStepDescription.Location = new System.Drawing.Point(485, 70);
+            this.lblStepDescription.Name = "lblStepDescription";
+            this.lblStepDescription.Size = new System.Drawing.Size(399, 13);
+            this.lblStepDescription.TabIndex = 10;
+            this.lblStepDescription.Text = "Állapot: Készen áll. Nyomd meg a \'Következő lépés\' vagy a \'Teljes futtatás\' gombo" +
     "t!";
             // 
-            // labelResult
+            // lblResult
             // 
-            this.labelResult.AutoSize = true;
-            this.labelResult.Location = new System.Drawing.Point(19, 720);
-            this.labelResult.Name = "labelResult";
-            this.labelResult.Size = new System.Drawing.Size(210, 13);
-            this.labelResult.TabIndex = 11;
-            this.labelResult.Text = "Eredmény: Még nincs lefuttatott szimuláció!";
+            this.lblResult.AutoSize = true;
+            this.lblResult.Location = new System.Drawing.Point(19, 720);
+            this.lblResult.Name = "lblResult";
+            this.lblResult.Size = new System.Drawing.Size(210, 13);
+            this.lblResult.TabIndex = 11;
+            this.lblResult.Text = "Eredmény: Még nincs lefuttatott szimuláció!";
             // 
             // dgvSimulation
             // 
@@ -220,8 +220,8 @@
             this.Controls.Add(this.numBitCount);
             this.Controls.Add(this.numEavesDropper);
             this.Controls.Add(this.dgvSimulation);
-            this.Controls.Add(this.labelResult);
-            this.Controls.Add(this.labelStepDescription);
+            this.Controls.Add(this.lblResult);
+            this.Controls.Add(this.lblStepDescription);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtRecieverBases);
             this.Controls.Add(this.labelSenderBases);
@@ -255,8 +255,8 @@
         private System.Windows.Forms.Label labelSenderBases;
         private System.Windows.Forms.TextBox txtRecieverBases;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label labelStepDescription;
-        private System.Windows.Forms.Label labelResult;
+        private System.Windows.Forms.Label lblStepDescription;
+        private System.Windows.Forms.Label lblResult;
         private System.Windows.Forms.DataGridView dgvSimulation;
         private System.Windows.Forms.NumericUpDown numEavesDropper;
         private System.Windows.Forms.NumericUpDown numBitCount;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BB84
+namespace B84
 {
     internal class BB84Simulation
     {
@@ -16,11 +16,22 @@ namespace BB84
 
         bool eavesdropping;
 
+        int evePercent;
+
         int numCount;
 
         float maxErrorRate;
 
         Random centralRnd;
+
+        //UI megjelenítéshez az eredeti adatok térolása
+        public List<int> InitialAliceBits { get; private set; } = new List<int>();
+        public List<string> InitialAliceBases { get; private set; } = new List<string>();
+        public List<string> InitialBobBases { get; private set; } = new List<string>();
+        public List<int> InitialBobBits { get; private set; } = new List<int>();
+        public List<int> SharedIndices { get; private set; } = new List<int>();
+        public float LastQBER { get; private set; }
+        public string LastStatusMessage { get; private set; } = "Készen áll.";
 
         public BB84Simulation()
         {
@@ -30,8 +41,27 @@ namespace BB84
             bob = new SimulatedUser(centralRnd);
             channel = new Channel(centralRnd);
             eavesdropping = false;
-            numCount = 100;
+            evePercent = 0;
+            numCount = 12;
             maxErrorRate = 0.20f;
+        }
+
+
+        public void Configure(List<int> aBits, List<string> aBases, List<string> bBases, bool isEveActive, int evePercentage)
+        {
+            ResetSimulation();
+            numCount = aBits.Count;
+            eavesdropping = isEveActive;
+            evePercent = evePercentage;
+            channel.SetEve(isEveActive ? evePercentage : 0);
+
+            InitialAliceBits = new List<int>(aBits);
+            InitialAliceBases = new List<string>(aBases);
+            InitialBobBases = new List<string>(bBases);
+
+            alice.SetBits(new List<int>(aBits));
+            alice.SetBases(new List<string>(aBases));
+            bob.SetBases(new List<string>(bBases));
         }
 
         public void NextStep()
@@ -115,12 +145,18 @@ namespace BB84
             }
         }
 
-        public void ResetSimultaion()
+        public void ResetSimulation()
         {
             stepCount = 0;
             alice = new SimulatedUser(centralRnd);
             bob = new SimulatedUser(centralRnd);
             channel = new Channel(centralRnd);
+            InitialAliceBits.Clear();
+            InitialAliceBases.Clear();
+            InitialBobBases.Clear();
+            InitialBobBits.Clear();
+            SharedIndices.Clear();
+            LastQBER = 0f;
         }
 
         public void SetEavesdropping(bool newEavesdropping)
@@ -236,7 +272,7 @@ namespace BB84
             else
             {
                 //amúgy meg úgy teszünk, mintha megtaláltuk volna a hibákat és kijavítottuk őket 
-                userB.SetBits(userA.GetBits);
+                userB.SetBits(userA.GetBits());
             }
         
             //TODO: eltérő groupSize és eltérő sorrend generálása
