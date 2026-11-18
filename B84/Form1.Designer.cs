@@ -52,7 +52,7 @@
             // chkEavesActive
             // 
             this.chkEavesActive.AutoSize = true;
-            this.chkEavesActive.Location = new System.Drawing.Point(22, 25);
+            this.chkEavesActive.Location = new System.Drawing.Point(165, 21);
             this.chkEavesActive.Name = "chkEavesActive";
             this.chkEavesActive.Size = new System.Drawing.Size(75, 17);
             this.chkEavesActive.TabIndex = 0;
@@ -62,7 +62,7 @@
             // 
             // btnGenerate
             // 
-            this.btnGenerate.Location = new System.Drawing.Point(488, 45);
+            this.btnGenerate.Location = new System.Drawing.Point(485, 120);
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(179, 23);
             this.btnGenerate.TabIndex = 1;
@@ -72,7 +72,7 @@
             // 
             // btnNextStep
             // 
-            this.btnNextStep.Location = new System.Drawing.Point(686, 45);
+            this.btnNextStep.Location = new System.Drawing.Point(705, 120);
             this.btnNextStep.Name = "btnNextStep";
             this.btnNextStep.Size = new System.Drawing.Size(165, 23);
             this.btnNextStep.TabIndex = 2;
@@ -82,7 +82,7 @@
             // 
             // btnRunAll
             // 
-            this.btnRunAll.Location = new System.Drawing.Point(914, 43);
+            this.btnRunAll.Location = new System.Drawing.Point(906, 120);
             this.btnRunAll.Name = "btnRunAll";
             this.btnRunAll.Size = new System.Drawing.Size(109, 23);
             this.btnRunAll.TabIndex = 3;
@@ -92,32 +92,32 @@
             // 
             // txtSenderBits
             // 
-            this.txtSenderBits.Location = new System.Drawing.Point(22, 133);
+            this.txtSenderBits.Location = new System.Drawing.Point(24, 122);
             this.txtSenderBits.Name = "txtSenderBits";
-            this.txtSenderBits.Size = new System.Drawing.Size(100, 20);
+            this.txtSenderBits.Size = new System.Drawing.Size(118, 20);
             this.txtSenderBits.TabIndex = 4;
             // 
             // labelSenderBits
             // 
             this.labelSenderBits.AutoSize = true;
-            this.labelSenderBits.Location = new System.Drawing.Point(19, 108);
+            this.labelSenderBits.Location = new System.Drawing.Point(21, 98);
             this.labelSenderBits.Name = "labelSenderBits";
             this.labelSenderBits.Size = new System.Drawing.Size(54, 13);
             this.labelSenderBits.TabIndex = 5;
             this.labelSenderBits.Text = "Alice bitjei";
-            this.labelSenderBits.Click += new System.EventHandler(this.labelSenderBits_Click);
+            
             // 
             // txtSenderBases
             // 
-            this.txtSenderBases.Location = new System.Drawing.Point(174, 133);
+            this.txtSenderBases.Location = new System.Drawing.Point(165, 122);
             this.txtSenderBases.Name = "txtSenderBases";
-            this.txtSenderBases.Size = new System.Drawing.Size(100, 20);
+            this.txtSenderBases.Size = new System.Drawing.Size(140, 20);
             this.txtSenderBases.TabIndex = 6;
             // 
             // labelSenderBases
             // 
             this.labelSenderBases.AutoSize = true;
-            this.labelSenderBases.Location = new System.Drawing.Point(171, 108);
+            this.labelSenderBases.Location = new System.Drawing.Point(162, 98);
             this.labelSenderBases.Name = "labelSenderBases";
             this.labelSenderBases.Size = new System.Drawing.Size(65, 13);
             this.labelSenderBases.TabIndex = 7;
@@ -125,15 +125,15 @@
             // 
             // txtRecieverBases
             // 
-            this.txtRecieverBases.Location = new System.Drawing.Point(321, 133);
+            this.txtRecieverBases.Location = new System.Drawing.Point(329, 122);
             this.txtRecieverBases.Name = "txtRecieverBases";
-            this.txtRecieverBases.Size = new System.Drawing.Size(100, 20);
+            this.txtRecieverBases.Size = new System.Drawing.Size(140, 20);
             this.txtRecieverBases.TabIndex = 8;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(318, 108);
+            this.label1.Location = new System.Drawing.Point(326, 98);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(61, 13);
             this.label1.TabIndex = 9;
@@ -142,10 +142,10 @@
             // lblStepDescription
             // 
             this.lblStepDescription.AutoSize = true;
-            this.lblStepDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblStepDescription.Location = new System.Drawing.Point(485, 136);
+            this.lblStepDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.lblStepDescription.Location = new System.Drawing.Point(19, 188);
             this.lblStepDescription.Name = "lblStepDescription";
-            this.lblStepDescription.Size = new System.Drawing.Size(399, 13);
+            this.lblStepDescription.Size = new System.Drawing.Size(457, 15);
             this.lblStepDescription.TabIndex = 10;
             this.lblStepDescription.Text = "Állapot: Készen áll. Nyomd meg a \'Következő lépés\' vagy a \'Teljes futtatás\' gombo" +
     "t!";
@@ -153,9 +153,10 @@
             // lblResult
             // 
             this.lblResult.AutoSize = true;
-            this.lblResult.Location = new System.Drawing.Point(19, 720);
+            this.lblResult.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.lblResult.Location = new System.Drawing.Point(19, 735);
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(210, 13);
+            this.lblResult.Size = new System.Drawing.Size(243, 15);
             this.lblResult.TabIndex = 11;
             this.lblResult.Text = "Eredmény: Még nincs lefuttatott szimuláció!";
             // 
@@ -166,7 +167,7 @@
             this.dgvSimulation.BackgroundColor = System.Drawing.SystemColors.Control;
             this.dgvSimulation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSimulation.ColumnHeadersVisible = false;
-            this.dgvSimulation.Location = new System.Drawing.Point(23, 182);
+            this.dgvSimulation.Location = new System.Drawing.Point(23, 220);
             this.dgvSimulation.Name = "dgvSimulation";
             this.dgvSimulation.ReadOnly = true;
             this.dgvSimulation.Size = new System.Drawing.Size(1088, 502);
@@ -179,7 +180,7 @@
             0,
             0,
             0});
-            this.numEavesDropper.Location = new System.Drawing.Point(22, 48);
+            this.numEavesDropper.Location = new System.Drawing.Point(165, 48);
             this.numEavesDropper.Name = "numEavesDropper";
             this.numEavesDropper.Size = new System.Drawing.Size(120, 20);
             this.numEavesDropper.TabIndex = 15;
@@ -192,9 +193,9 @@
             // 
             // numBitCount
             // 
-            this.numBitCount.Location = new System.Drawing.Point(210, 48);
+            this.numBitCount.Location = new System.Drawing.Point(24, 48);
             this.numBitCount.Maximum = new decimal(new int[] {
-            32,
+            30,
             0,
             0,
             0});
@@ -215,7 +216,7 @@
             // labelNumBits
             // 
             this.labelNumBits.AutoSize = true;
-            this.labelNumBits.Location = new System.Drawing.Point(207, 25);
+            this.labelNumBits.Location = new System.Drawing.Point(21, 21);
             this.labelNumBits.Name = "labelNumBits";
             this.labelNumBits.Size = new System.Drawing.Size(64, 13);
             this.labelNumBits.TabIndex = 17;

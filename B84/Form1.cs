@@ -30,6 +30,7 @@ namespace B84
         private void Véletlengenerálás_Click(object sender, EventArgs e)
         {
             GenerateRandomInputs();
+            SetInputsEnabled(true);
         }
 
         // Random bemeneet generál a véletlen generálás gombhoz, beállítja a ui-t
@@ -136,6 +137,7 @@ namespace B84
             if (sim.stepCount == 0)
             {
                 if (!PrepareSimulationFromUI()) return;
+                SetInputsEnabled(false);
             }
 
             sim.NextStep();
@@ -187,7 +189,7 @@ namespace B84
             {
                 AddRow("Alice bitjei", sim.InitialAliceBits.Select(b => b.ToString()).ToArray());
                 AddRow("Alice bázisai", sim.InitialAliceBases.ToArray());
-
+                    
                 string[] arrows = new string[n];
                 for (int i = 0; i < n; i++)
                     arrows[i] = GetPolarizationArrow(sim.InitialAliceBits[i], sim.InitialAliceBases[i]);
@@ -267,9 +269,16 @@ namespace B84
             return bit == 0 ? "↗" : "↖";
         }
 
-        private void labelSenderBits_Click(object sender, EventArgs e)
+        // Beállítja, hogy mikor lehet állítani a bemenetetket 
+        private void SetInputsEnabled(bool enabled)
         {
-
+            txtSenderBits.Enabled = enabled;
+            txtSenderBases.Enabled = enabled;
+            txtRecieverBases.Enabled = enabled;
+            numBitCount.Enabled = enabled;
+            chkEavesActive.Enabled = enabled;
+            // A százalékos doboz csak akkor legyen aktív, ha a bemenetek engedélyezve vannak ÉS be van pipálva a lehallgató
+            numEavesDropper.Enabled = enabled && chkEavesActive.Checked;
         }
     }
 }
