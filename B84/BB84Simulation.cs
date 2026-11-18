@@ -163,6 +163,9 @@ namespace B84
         {
             eavesdropping = newEavesdropping;
         }
+
+        public string GetFinalKeyString() => string.Join("", alice.GetBits());
+        public string GetBobFinalKeyString() => string.Join("", bob.GetBits());
     }
 
     internal class Channel

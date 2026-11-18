@@ -61,7 +61,7 @@
             // 
             // btnGenerate
             // 
-            this.btnGenerate.Location = new System.Drawing.Point(488, 14);
+            this.btnGenerate.Location = new System.Drawing.Point(488, 45);
             this.btnGenerate.Name = "btnGenerate";
             this.btnGenerate.Size = new System.Drawing.Size(179, 23);
             this.btnGenerate.TabIndex = 1;
@@ -71,7 +71,7 @@
             // 
             // btnNextStep
             // 
-            this.btnNextStep.Location = new System.Drawing.Point(686, 14);
+            this.btnNextStep.Location = new System.Drawing.Point(686, 45);
             this.btnNextStep.Name = "btnNextStep";
             this.btnNextStep.Size = new System.Drawing.Size(165, 23);
             this.btnNextStep.TabIndex = 2;
@@ -81,7 +81,7 @@
             // 
             // btnRunAll
             // 
-            this.btnRunAll.Location = new System.Drawing.Point(914, 12);
+            this.btnRunAll.Location = new System.Drawing.Point(914, 43);
             this.btnRunAll.Name = "btnRunAll";
             this.btnRunAll.Size = new System.Drawing.Size(109, 23);
             this.btnRunAll.TabIndex = 3;
@@ -140,7 +140,7 @@
             // 
             this.lblStepDescription.AutoSize = true;
             this.lblStepDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblStepDescription.Location = new System.Drawing.Point(485, 70);
+            this.lblStepDescription.Location = new System.Drawing.Point(485, 136);
             this.lblStepDescription.Name = "lblStepDescription";
             this.lblStepDescription.Size = new System.Drawing.Size(399, 13);
             this.lblStepDescription.TabIndex = 10;
@@ -162,10 +162,10 @@
             this.dgvSimulation.AllowUserToDeleteRows = false;
             this.dgvSimulation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSimulation.ColumnHeadersVisible = false;
-            this.dgvSimulation.Location = new System.Drawing.Point(210, 247);
+            this.dgvSimulation.Location = new System.Drawing.Point(23, 182);
             this.dgvSimulation.Name = "dgvSimulation";
             this.dgvSimulation.ReadOnly = true;
-            this.dgvSimulation.Size = new System.Drawing.Size(240, 150);
+            this.dgvSimulation.Size = new System.Drawing.Size(1088, 502);
             this.dgvSimulation.TabIndex = 12;
             // 
             // numEavesDropper
@@ -216,6 +216,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(1328, 786);
             this.Controls.Add(this.labelNumBits);
             this.Controls.Add(this.numBitCount);

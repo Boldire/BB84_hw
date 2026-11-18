@@ -227,7 +227,7 @@ namespace B84
                 {
                     lblResult.Text = $"Hibaarány (QBER): {sim.LastQBER * 100:0.0}%\n" +
                                      $"Küldő végső kulcsa: {sim.GetFinalKeyString()}\n" +
-                                     $"Vevő végső kulcsa:   {sim.GetRecieverFinalKeyString()}";
+                                     $"Vevő végső kulcsa:   {sim.GetBobFinalKeyString()}";
                     lblResult.ForeColor = Color.DarkGreen;
                 }
             }
