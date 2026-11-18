@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace B84
@@ -30,7 +31,9 @@ namespace B84
         public List<string> InitialAliceBases { get; private set; } = new List<string>();
         public List<string> InitialBobBases { get; private set; } = new List<string>();
         public List<int> InitialBobBits { get; private set; } = new List<int>();
+        public List<int> CorrectedBobBits { get; private set; } = new List<int>();
         public List<int> SharedIndices { get; private set; } = new List<int>();
+        public List<int> validatorBitSpots { get; private set; } = new List<int>();
         public float LastQBER { get; private set; }
         public string LastStatusMessage { get; private set; } = "Készen áll.";
 
@@ -73,12 +76,12 @@ namespace B84
                     LastStatusMessage = "1. lépés: Alice előkészítette a biteket és a bázisokat.";
                     break;
                 case 1:
-                    //Alice elküldi a qubitokat
                     List<MyQubit> qubits = alice.GeneratedQubits();
                     channel.TransmitQubits(qubits);
                     LastStatusMessage = "2. lépés: Alice elküldte a polarizált fotonokat a csatornán.";
                     break;
                 case 2:
+                    //Alice elküldi a qubitokat
                     if (eavesdropping && evePercent > 0)
                     {
                         //Eve lehallgatja a qubitok egy részét
@@ -93,7 +96,7 @@ namespace B84
                     break;
                 case 3:
                     //Bob megkapja a qubitokat (ezek lehet, hogy le lettek hallgatva Eve által)
-                    List<MyQubit> recievedQubits = channel.RecieveQubits(); 
+                    List<MyQubit> recievedQubits = channel.RecieveQubits();
                     //Bob megméri a kapott qubiteket és a kapott biteket elmenti
                     bob.SetBits(bob.MeasureQubits(recievedQubits));
                     InitialBobBits = new List<int>(bob.GetBits());
@@ -101,57 +104,53 @@ namespace B84
                     break;
                 case 4:
                     SharedIndices = channel.SharedBases(alice.GetBases(), bob.GetBases());
+                    //Sifting
                     //Alice és Bob egyeztetik az alapjaikat és az eltérő alapokat eldobják
-                    //Ekkor a megtartott és nem lehallgatott bitek megegyeznek mindkét oldalon (feltételezve, hogy nincsen zaj)
-                    alice.Sifting(SharedIndices);
-                    bob.Sifting(SharedIndices);
-                    LastStatusMessage = $"5. lépés: Bázisegyeztetés kész ({SharedIndices.Count} egyező bit maradt).";
+                    //Ekkor a megtartott (és nem lehallgatott) bitek megegyeznek mindkét oldalon (feltételezve, hogy nincsen zaj)
+                    alice.KeepAvailableSpot(SharedIndices);
+                    bob.KeepAvailableSpot(SharedIndices);
+                    Debug.Print("Alice available spots: "+alice.availableSpots.Count);
+                    Debug.Print("Bob available spots: " + bob.availableSpots.Count);
+                    if (SharedIndices.Count < 2)
+                    {
+                        LastStatusMessage = $"5. lépés: Bázisegyeztetés hiba, nincsenek közös bázisok!";
+                        stepCount = -1;
+                    }
+                    else
+                    {
+                        LastStatusMessage = $"5. lépés: Bázisegyeztetés kész ({SharedIndices.Count} egyező bit maradt).";
+                    }
                     break;
                 case 5:
-                    //kiválasztunk Y% véletlen bitet
-                    List<int> validatorBits = alice.SelectRandomBits(40);
-                    List<int> alicePublicBits = alice.QBERSelect(validatorBits);
-                    List<int> bobPublicBits = bob.QBERSelect(validatorBits);
+                    //kiválasztunk Y% véletlen bitet (a megtartott bitekből)
+                    validatorBitSpots = alice.SelectRandomBitSpots(50);
+                    Debug.Print("Public bitSpot count: "+validatorBitSpots.Count);
+                    List<int> alicePublicBits = alice.SelectBits(validatorBitSpots);
+                    List<int> bobPublicBits = bob.SelectBits(validatorBitSpots);
+                    alice.RemoveAvailableSpot(validatorBitSpots);
+                    bob.RemoveAvailableSpot(validatorBitSpots);
                     LastQBER = channel.CheckQBER(alicePublicBits,bobPublicBits);
-                    alice.QBERRemove(validatorBits);
-                    bob.QBERRemove(validatorBits);
                     if (LastQBER > maxErrorRate)
                     {
-                        LastStatusMessage = $"6. lépés: RIASZTÁS! Túl magas hibaarány (QBER: {LastQBER * 100:0.0}% > 20%). Protokoll megszakítva!";
+                        LastStatusMessage = $"6. lépés: Néhány bitet publikussá teszünk és összehasonlítunk. RIASZTÁS! Túl magas hibaarány (QBER: {LastQBER * 100:0.0}% > {maxErrorRate * 100:0.0}%). Protokoll megszakítva!";
                         //megáll az algoritmus és újra kell kezdenünk
                         stepCount = -1;
                     }
                     else 
                     {
-                        LastStatusMessage = $"6. lépés: Hibaellenőrzés sikeres (QBER: {LastQBER * 100:0.0}%).";
+                        LastStatusMessage = $"6. lépés: Néhány bitet publikussá teszünk és összehasonlítunk. Hibaellenőrzés sikeres (QBER: {LastQBER * 100:0.0}%).";
                     }
                     break;
                 case 6:
                     //az két felhasználónál tárolt biteket össze kell hasonlítanunk, és a hibákat javítanunk kell
                     channel.CascadeParityCheck(alice,bob);
+                    CorrectedBobBits = new List<int>(bob.GetBits());
                     LastStatusMessage = "7. lépés: Hibajavítás lefutott.";
                     break;
                 case 7:
-                    //ha végeztünk a hiba- kereső és javító algoritmussal, még mindig lehetnek hibák a bitek között
-                    //mindkét felhasználó hash-el a bitjeit
-                    string aliceHash = alice.BitHashing();
-                    string bobHash = bob.BitHashing();
-                    if (aliceHash.Equals(bobHash))
-                    {
-                        //minden rendben, a két bitsor szinte biztosan egyezik (két eltérő bitsor adhat azonos hash-t, de ennek esélyét gyakorlatilag vehetjük nullának)
-                        LastStatusMessage = "8. lépés: Hash-ellenőrzés sikeres, a kulcsok egyeznek.";
-                    }
-                    else
-                    {
-                        //valami nagyon félrement, leállunk, újra kell kezdeni az algoritmust
-                        stepCount = -1;
-                        LastStatusMessage = "8. lépés: Hiba a hash-ellenőrzés során!";
-                    }
-                    break;
-                case 8:
-                    //kész vagyunk, a kapott bitsorok egyeznek
-                    List<int> finalBits = alice.GetBits();
-                    LastStatusMessage = "9. lépés: Kész! A titkos kulcs létrejött.";
+                    //végezhetnénk hasehelést, de egyrészt nincsen jó mód vizuálisan megmutatni a hash eredményét
+                    //másrészt a biteket a felhasználó a javításnál könnyen össze tudja vetni
+                    LastStatusMessage = "8. lépés: A kulcsok egyeznek, mindkétt fél rendelkezik a titkos kulccsal.";
                     break;
                 default:
                     //végére értünk, megáll a szimuláció
@@ -177,6 +176,9 @@ namespace B84
             InitialBobBits.Clear();
             SharedIndices.Clear();
             LastQBER = 0f;
+            CorrectedBobBits.Clear();
+            validatorBitSpots.Clear();
+            LastStatusMessage = "Készen áll.";
         }
 
         //végigmegyünk a szimulátoron
@@ -188,8 +190,8 @@ namespace B84
             }
         }
 
-        public string GetFinalKeyString() => string.Join("", alice.GetBits());
-        public string GetBobFinalKeyString() => string.Join("", bob.GetBits());
+        public string GetFinalKeyString() => string.Join("", alice.SelectBits(alice.availableSpots));
+        public string GetBobFinalKeyString() => string.Join("", bob.SelectBits(bob.availableSpots));
     }
 
     internal class Channel
@@ -260,7 +262,7 @@ namespace B84
         public List<int> SharedBases(List<string> aliceBases, List<string> bobBases)
         {
             List<int> output = new List<int>();
-            //összehasonlítjuk Alice és Bob mérési alapjait és megtartjuk a megegyezőket
+            //összehasonlítjuk Alice és Bob mérési alapjait
             for (int i=0; i<aliceBases.Count; i++)
             {
                 if (aliceBases[i].Equals(bobBases[i]))
@@ -268,6 +270,7 @@ namespace B84
                     output.Add(i); 
                 }
             }
+            //a megegyező alapok helyét adjuk vissza
             return output;
         }
 
@@ -292,19 +295,16 @@ namespace B84
         public void CascadeParityCheck(SimulatedUser userA, SimulatedUser userB)
         {
             //csak úgy teszünk, mintha lenne egy hibaellenőrzés
-            if (rnd.Next(0,30)==0)
-            {
-                //ha megütjük az 1/30 esélyt, nem csinálunk semmit
-                return;
-            }
-            else
-            {
-                //amúgy meg úgy teszünk, mintha megtaláltuk volna a hibákat és kijavítottuk őket 
+            //if (rnd.Next(0,30)==0)
+            //{
+            //    //ha megütjük az 1/30 esélyt, nem csinálunk semmit
+            //    return;
+            //}
+            //else
+            //{
+            //    //amúgy meg úgy teszünk, mintha megtaláltuk volna a hibákat és kijavítottuk őket 
                 userB.SetBits(userA.GetBits());
-            }
-        
-            //TODO: eltérő groupSize és eltérő sorrend generálása
-            //TODO: userA.RangeParity és userB.RangeParity összehasonlítása, eltérés esetén kijavítjuk a hibát
+            //
         }
     }
 
@@ -314,13 +314,16 @@ namespace B84
         List<int> bits;
         //itt tároljuk akár a véletlenül generált, akár a mérés eredményeként kapott mérési alapokat (D és R)
         List<string> bases;
-        
+        //a még elérhető pozíciók helyét tárolja
+        public List<int> availableSpots;
+
         private Random rnd;
 
         public SimulatedUser(Random centralRnd)
         {
             bits = new List<int>();
             bases = new List<string>();
+            availableSpots = new List<int>();
             rnd = centralRnd;
         }
 
@@ -340,6 +343,10 @@ namespace B84
         {
             GenerateBits(count);
             GenerateBases(count);
+            for (int i = 0; i<count; i++)
+            {
+                availableSpots.Add(i);
+            }
         }
 
         //véletlenszerűen generál [count] darab bitet
@@ -352,7 +359,7 @@ namespace B84
         }
 
         //véletlenszerűen generál [count] darab alapot
-        public void GenerateBases(int count)
+        private void GenerateBases(int count)
         {
             for (int i = 0; i < count; i++)
             {
@@ -408,65 +415,62 @@ namespace B84
             bases = newBases;
         }
 
-        public List<int> SelectRandomBits(int targetPercent)
+        public List<int> SelectRandomBitSpots(int targetPercent)
         {
-            if (targetPercent>100)
+            if (targetPercent > 100)
             {
                 targetPercent = 100;
             }
+            if (targetPercent < 0)
+            {
+                targetPercent = 0;
+            }
             List<int> output = new List<int>();
-            int targetCount = (int)((targetPercent / 100.0f) * (bases.Count));
-
+            int targetCount = (int)((targetPercent / 100.0f) * (availableSpots.Count));
             while (output.Count != targetCount)
             {
-                int newNum = rnd.Next(0,bases.Count);
-                if (!output.Contains(newNum))
-                    output.Add(newNum);
+                //a még elérhető bitek pozícióiból választunk párat
+                int newNum = rnd.Next(0, availableSpots.Count);
+                //csak akkor adjuk a kimenethez, ha még nem választottuk (egyedi kimenetek kellenek)
+                if (!output.Contains(availableSpots[newNum]))
+                {
+                    output.Add(availableSpots[newNum]); 
+                }
             }
-
             return output;
         }
 
-        public List<int> QBERSelect(List<int> publicList)
+        public List<int> SelectBits(List<int> bitSpots)
         {
+
             List<int> output = new List<int>();
-            foreach (int i in publicList)
+
+            foreach (int i in bitSpots)
             {
                 output.Add(bits[i]);
             }
 
-    
             return output;
         }
 
-        public void QBERRemove(List<int> publicList)
+        //eltávolítjuk a megadott bitek helyeit (magukhoz a bitekhez nem nyúlunk)
+        public void RemoveAvailableSpot(List<int> bitSpots)
         {
-            //a publikusan megoszotott biteket eldobjuk
-            List<int> newBits = new List<int>();
-            List<string> newBases = new List<string>();
-            for (int i = 0; i < bases.Count; i++)
+            foreach (int i in bitSpots)
             {
-                if (!publicList.Contains(i))
-                {
-                    newBits.Add(bits[i]);
-                    newBases.Add(bases[i]);
-                }
+                availableSpots.Remove(i);
             }
-            bits = newBits;
-            bases = newBases;
         }
 
-        public List<int> RangeParity(int groupSize, List<int> orderList)
+        //csak a megadott bitek helyeit tartjuk meg (magukhoz a bitekhez még mindig nem nyúlunk)
+        public void KeepAvailableSpot(List<int> bitSpots)
         {
-            List<int> output = new List<int>();
-            //csak egy alternatív sorrendje a bitlistának
-            List<int> dummyList = new List<int>();
-            foreach(int i in orderList)
+            availableSpots = bitSpots;
+            /*foreach (int i in availableSpots)
             {
-                dummyList.Add(bits[i]);
-            }
-            //TODO: groupSize méretű csoportokra bontva megnézzük a parítását dummyList-nek
-            return output;
+                if (!bitSpots.Contains(i))
+                    availableSpots.Remove(i);
+            }*/
         }
 
         public string BitHashing()

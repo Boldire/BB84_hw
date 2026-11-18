@@ -169,7 +169,7 @@
             this.dgvSimulation.Location = new System.Drawing.Point(23, 182);
             this.dgvSimulation.Name = "dgvSimulation";
             this.dgvSimulation.ReadOnly = true;
-            this.dgvSimulation.Size = new System.Drawing.Size(1088, 502);
+            this.dgvSimulation.Size = new System.Drawing.Size(1278, 502);
             this.dgvSimulation.TabIndex = 12;
             // 
             // numEavesDropper
