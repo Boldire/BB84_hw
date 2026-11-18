@@ -77,6 +77,7 @@
             this.btnNextStep.TabIndex = 2;
             this.btnNextStep.Text = "Következő lépés";
             this.btnNextStep.UseVisualStyleBackColor = true;
+            this.btnNextStep.Click += new System.EventHandler(this.btnNextStep_Click);
             // 
             // btnRunAll
             // 

@@ -5,7 +5,7 @@ namespace B84
 {
     internal class BB84Simulation
     {
-        int stepCount;
+        public int stepCount { get; private set; }
 
         //küldő
         private SimulatedUser alice;
