@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace B84
 {
@@ -93,7 +94,8 @@ namespace B84
                     bob.GenerateBases(numCount);
                     //Bob megkapja a qubitokat (ezek lehet, hogy le lettek hallgatva Eve által)
                     qubits = channel.RecieveQubits(); 
-                    bob.MeasureQubits(qubits);
+                    //Bob megméri a kapott qubiteket és a kapott biteket elmenti
+                    bob.SetBits(bob.MeasureQubits(qubits));
                     break;
                 case 4:
                     List<int> sharedBases = channel.SharedBases(alice.GetBases(), bob.GetBases());
@@ -121,7 +123,9 @@ namespace B84
                 case 7:
                     //ha végeztünk a hiba- kereső és javító algoritmussal, még mindig lehetnek hibák a bitek között
                     //mindkét felhasználó hash-el a bitjeit
-                    if (alice.BitHashing().Equals(bob.BitHashing()))
+                    string aliceHash = alice.BitHashing();
+                    string bobHash = bob.BitHashing();
+                    if (aliceHash.Equals(bobHash))
                     {
                         //minden rendben, a két bitsor szinte biztosan egyezik (két eltérő bitsor adhat azonos hash-t, de ennek esélyét gyakorlatilag vehetjük nullának)
                     }
@@ -145,6 +149,7 @@ namespace B84
             }
         }
 
+        //visszaállítjuk a szimulátort alaphelyztebe
         public void ResetSimulation()
         {
             stepCount = 0;
@@ -159,9 +164,13 @@ namespace B84
             LastQBER = 0f;
         }
 
-        public void SetEavesdropping(bool newEavesdropping)
+        //végigmegyünk a szimulátoron
+        public void FullSim()
         {
-            eavesdropping = newEavesdropping;
+            while (stepCount < 9)
+            {
+                NextStep();
+            }
         }
     }
 
@@ -262,8 +271,7 @@ namespace B84
 
         public void CascadeParityCheck(SimulatedUser userA, SimulatedUser userB)
         {
-            //ezt majd később el kéne távolítani
-            //most csak úgy teszünk, mintha lenne egy hibaellenőrzés
+            //csak úgy teszünk, mintha lenne egy hibaellenőrzés
             if (rnd.Next(0,30)==0)
             {
                 //ha megütjük az 1/30 esélyt, nem csinálunk semmit
@@ -276,7 +284,7 @@ namespace B84
             }
         
             //TODO: eltérő groupSize és eltérő sorrend generálása
-            //TODO: userA.RangeParity és userB.RangeParity
+            //TODO: userA.RangeParity és userB.RangeParity összehasonlítása, eltérés esetén kijavítjuk a hibát
         }
     }
 
@@ -296,6 +304,7 @@ namespace B84
             rnd = centralRnd;
         }
 
+        //ad egy listát, amely a generált qubit-okat tárolja
         public List<MyQubit> GeneratedQubits()
         {
             List<MyQubit> output = new List<MyQubit>();
@@ -306,12 +315,14 @@ namespace B84
             return output;
         }
 
+        //véletlenszerűen generál [count] darab bitet és alapot
         public void GenerateStuffs(int count)
         {
             GenerateBits(count);
             GenerateBases(count);
         }
-        
+
+        //véletlenszerűen generál [count] darab bitet
         private void GenerateBits(int count)
         {
             for (int i=0; i<count; i++)
@@ -320,6 +331,7 @@ namespace B84
             }
         }
 
+        //véletlenszerűen generál [count] darab alapot
         public void GenerateBases(int count)
         {
             for (int i = 0; i < count; i++)
@@ -331,13 +343,16 @@ namespace B84
             }
         }
 
-        public void MeasureQubits(List<MyQubit> qubits)
+
+        //adott alap szerint megméri az összes qubitet
+        public List<int> MeasureQubits(List<MyQubit> qubits)
         {
-            bits = new List<int>();
+            List<int> newBits = new List<int>();
             for (int i=0; i<qubits.Count; i++)
             {
-                bits.Add(qubits[i].GetValue(bases[i]));
+                newBits.Add(qubits[i].GetValue(bases[i]));
             }
+            return newBits;
         }
 
         public List<int> GetBits()
@@ -432,8 +447,20 @@ namespace B84
 
         public string BitHashing()
         {
-            //TODO: a felhasználónál tárolt biteket hash-elő algoritmusba helyezzük és a kimenetet továbbadjuk
-            return "yo";
+            byte[] bitBytes = new byte[(bits.Count + 7) / 8];
+            HashAlgorithm algo = SHA256.Create();
+            //az int-ként tárolt bitekből byte-okat csinálunk
+            for (int i=0; i<bits.Count; i++)
+            {
+                if (bits[i] == 1)
+                {
+                    bitBytes[i / 8] |= (byte)(1 << (7 - (i % 8)));
+                }
+            }
+            //a hash-elt biteket stringként adjuk vissza
+            byte[] bitHash = algo.ComputeHash(bitBytes);
+            string output = Convert.ToString(bitHash);
+            return output;
         }
     }
 
