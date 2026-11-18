@@ -58,6 +58,7 @@ namespace B84
             lblStepDescription.Text = "Állapot: Új véletlen adatok legenerálva. Kattints a 'Következő lépés' vagy 'Teljes futtatás' gombra!";
             lblResult.Text = "Eredmény: Még nincs lefuttatott szimuláció.";
             lblResult.ForeColor = Color.Black;
+            btnNextStep.Enabled = true;
 
 
         }
@@ -168,6 +169,8 @@ namespace B84
         // Táblázat és feliratok frissítése a lépések közben
         private void UpdateUI()
         {
+            btnNextStep.Enabled = (sim.stepCount != -1);
+
             lblStepDescription.Text = sim.LastStatusMessage;
             int n = sim.InitialAliceBits.Count;
             if (n == 0) return;
