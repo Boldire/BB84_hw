@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace B84
@@ -69,7 +70,7 @@ namespace B84
 
             if (string.IsNullOrEmpty(aBitsStr))
             {
-                MessageBox.Show("Adj meg legalább 1 bitet a Küldőnek!", "Hiányzó adat", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Adj meg legalább 1 bitet a Alice-nek!", "Hiányzó adat", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -109,7 +110,7 @@ namespace B84
             {
                 if (aBitsStr[i] != '0' && aBitsStr[i] != '1')
                 {
-                    MessageBox.Show("A küldő bitjei csak '0' és '1' karaktereket tartalmazhatnak!", "Hibás formátum", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Alice bitjei csak '0' és '1' karaktereket tartalmazhatnak!", "Hibás formátum", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
                 if ((aBasesStr[i] != 'R' && aBasesStr[i] != 'D') || (bBasesStr[i] != 'R' && bBasesStr[i] != 'D'))
@@ -181,23 +182,35 @@ namespace B84
                 dgvSimulation.Columns[i + 1].Width = 35;
             }
 
-            // 1. lépés után: Küldő adatai és polarizáció
+            // 1. lépés után: Alice adatai és polarizáció
             if (sim.stepCount >= 1 || sim.stepCount == -1)
             {
-                AddRow("Küldő bitjei", sim.InitialAliceBits.Select(b => b.ToString()).ToArray());
-                AddRow("Küldő bázisai", sim.InitialAliceBases.ToArray());
+                AddRow("Alice bitjei", sim.InitialAliceBits.Select(b => b.ToString()).ToArray());
+                AddRow("Alice bázisai", sim.InitialAliceBases.ToArray());
 
                 string[] arrows = new string[n];
                 for (int i = 0; i < n; i++)
                     arrows[i] = GetPolarizationArrow(sim.InitialAliceBits[i], sim.InitialAliceBases[i]);
                 AddRow("Küldött polarizáció", arrows);
+                ////////////////////////////////////
+                string[] dummylist = new string[(int) numBitCount.Value];
+                for (int i = 0; i < numBitCount.Value; i++) 
+                {
+                    dummylist[i] = "+";
+                }
+                int rowindex = AddRow("Eve által lehallgatot bitek:", dummylist);
+                foreach (int i in sim.channel.eavesdropped) 
+                {
+                    dgvSimulation.Rows[rowindex].Cells[i + 1].Style.BackColor = Color.Red;
+                }
             }
 
-            // 4. lépés után: Vevő adatai
+            // 4. lépés után: Bob adatai
             if (sim.stepCount >= 4 || sim.stepCount == -1)
             {
-                AddRow("Vevő bázisai", sim.InitialBobBases.ToArray());
-                AddRow("Vevő mért bitjei", sim.InitialBobBits.Select(b => b.ToString()).ToArray());
+                AddRow("Bob bázisai", sim.InitialBobBases.ToArray());
+                AddRow("Bob mért bitjei", sim.InitialBobBits.Select(b => b.ToString()).ToArray());
+                
             }
 
             // 5. lépés után: Bázisegyeztetés
@@ -226,8 +239,8 @@ namespace B84
                 else
                 {
                     lblResult.Text = $"Hibaarány (QBER): {sim.LastQBER * 100:0.0}%\n" +
-                                     $"Küldő végső kulcsa: {sim.GetFinalKeyString()}\n" +
-                                     $"Vevő végső kulcsa:   {sim.GetBobFinalKeyString()}";
+                                     $"Alice végső kulcsa: {sim.GetFinalKeyString()}\n" +
+                                     $"Bob végső kulcsa:   {sim.GetBobFinalKeyString()}";
                     lblResult.ForeColor = Color.DarkGreen;
                 }
             }
@@ -252,6 +265,11 @@ namespace B84
         { 
             if (basis == "R") return bit == 0 ? "↔" : "↕";
             return bit == 0 ? "↗" : "↖";
+        }
+
+        private void labelSenderBits_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

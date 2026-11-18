@@ -13,7 +13,7 @@ namespace B84
         //fogadó
         private SimulatedUser bob;
 
-        private Channel channel;
+        public Channel channel;
 
         bool eavesdropping;
 
@@ -70,55 +70,66 @@ namespace B84
             switch (stepCount)
             {
                 case 0:
-                    //Alice generál magának X bitet és X mérési alapot
-                    alice.GenerateStuffs(numCount);
+                    LastStatusMessage = "1. lépés: Alice előkészítette a biteket és a bázisokat.";
                     break;
                 case 1:
                     //Alice elküldi a qubitokat
                     List<MyQubit> qubits = alice.GeneratedQubits();
                     channel.TransmitQubits(qubits);
+                    LastStatusMessage = "2. lépés: Alice elküldte a polarizált fotonokat a csatornán.";
                     break;
                 case 2:
-                    if (eavesdropping)
+                    if (eavesdropping && evePercent > 0)
                     {
                         //Eve lehallgatja a qubitok egy részét
                         channel.ApplyEve();
+                        LastStatusMessage = $"3. lépés: Eve (lehallgató) lehallgatta a fotonok {evePercent}%-át!";
                     }
                     else
                     {
                         //ha be lenne kapcsolva a lehallgatás, az itt történne
+                        LastStatusMessage = "3. lépés: Nem történt lehallgatás a csatornán.";
                     }
                     break;
                 case 3:
-                    //Bob generál magának X mérési alapot
-                    bob.GenerateBases(numCount);
                     //Bob megkapja a qubitokat (ezek lehet, hogy le lettek hallgatva Eve által)
-                    qubits = channel.RecieveQubits(); 
+                    List<MyQubit> recievedQubits = channel.RecieveQubits(); 
                     //Bob megméri a kapott qubiteket és a kapott biteket elmenti
-                    bob.SetBits(bob.MeasureQubits(qubits));
+                    bob.SetBits(bob.MeasureQubits(recievedQubits));
+                    InitialBobBits = new List<int>(bob.GetBits());
+                    LastStatusMessage = "4. lépés: Bob megmérte a beérkező fotonokat a saját bázisaival.";
                     break;
                 case 4:
-                    List<int> sharedBases = channel.SharedBases(alice.GetBases(), bob.GetBases());
+                    SharedIndices = channel.SharedBases(alice.GetBases(), bob.GetBases());
                     //Alice és Bob egyeztetik az alapjaikat és az eltérő alapokat eldobják
                     //Ekkor a megtartott és nem lehallgatott bitek megegyeznek mindkét oldalon (feltételezve, hogy nincsen zaj)
-                    alice.Sifting(sharedBases);
-                    bob.Sifting(sharedBases);
+                    alice.Sifting(SharedIndices);
+                    bob.Sifting(SharedIndices);
+                    LastStatusMessage = $"5. lépés: Bázisegyeztetés kész ({SharedIndices.Count} egyező bit maradt).";
                     break;
                 case 5:
                     //kiválasztunk Y% véletlen bitet
                     List<int> validatorBits = alice.SelectRandomBits(40);
                     List<int> alicePublicBits = alice.QBERSelect(validatorBits);
                     List<int> bobPublicBits = bob.QBERSelect(validatorBits);
-                    float QBER = channel.CheckQBER(alicePublicBits,bobPublicBits);
-                    if (QBER > maxErrorRate)
-                    { 
+                    LastQBER = channel.CheckQBER(alicePublicBits,bobPublicBits);
+                    alice.QBERRemove(validatorBits);
+                    bob.QBERRemove(validatorBits);
+                    if (LastQBER > maxErrorRate)
+                    {
+                        LastStatusMessage = $"6. lépés: RIASZTÁS! Túl magas hibaarány (QBER: {LastQBER * 100:0.0}% > 20%). Protokoll megszakítva!";
                         //megáll az algoritmus és újra kell kezdenünk
-                        stepCount = -1; 
+                        stepCount = -1;
+                    }
+                    else 
+                    {
+                        LastStatusMessage = $"6. lépés: Hibaellenőrzés sikeres (QBER: {LastQBER * 100:0.0}%).";
                     }
                     break;
                 case 6:
                     //az két felhasználónál tárolt biteket össze kell hasonlítanunk, és a hibákat javítanunk kell
                     channel.CascadeParityCheck(alice,bob);
+                    LastStatusMessage = "7. lépés: Hibajavítás lefutott.";
                     break;
                 case 7:
                     //ha végeztünk a hiba- kereső és javító algoritmussal, még mindig lehetnek hibák a bitek között
@@ -128,19 +139,23 @@ namespace B84
                     if (aliceHash.Equals(bobHash))
                     {
                         //minden rendben, a két bitsor szinte biztosan egyezik (két eltérő bitsor adhat azonos hash-t, de ennek esélyét gyakorlatilag vehetjük nullának)
+                        LastStatusMessage = "8. lépés: Hash-ellenőrzés sikeres, a kulcsok egyeznek.";
                     }
                     else
                     {
                         //valami nagyon félrement, leállunk, újra kell kezdeni az algoritmust
                         stepCount = -1;
+                        LastStatusMessage = "8. lépés: Hiba a hash-ellenőrzés során!";
                     }
                     break;
                 case 8:
                     //kész vagyunk, a kapott bitsorok egyeznek
-                    List<int> finalBits = alice.GetBits(); 
+                    List<int> finalBits = alice.GetBits();
+                    LastStatusMessage = "9. lépés: Kész! A titkos kulcs létrejött.";
                     break;
                 default:
                     //végére értünk, megáll a szimuláció
+                    LastStatusMessage = "A szimuláció véget ért. Nyomj új Véletlen generálást az újrakezdéshez!";
                     break;
             }
             if (stepCount != -1)
@@ -181,6 +196,8 @@ namespace B84
     {
         //A lehallgató fél a qubitok hány százalékát méri meg?
         private int eve;
+
+        public List<int> eavesdropped = new List<int>();
         Random rnd;
 
         List<MyQubit> transmission;
@@ -209,7 +226,7 @@ namespace B84
         public void ApplyEve()
         {
             //a lehallgató (Eve) a közvetített qubitok [eve]%-át hallgatja le
-            List<int> eavesdropped = new List<int>();
+            eavesdropped = new List<int>();
             //ennyi qubitot célunk lehallgatni
             int targetCount = (int)((eve / 100.0f) * transmission.Count);
             while (eavesdropped.Count != targetCount)
@@ -269,7 +286,7 @@ namespace B84
                     incorrect++;
                 }
             }
-            return (float)incorrect / (incorrect+correct);
+            return (float)incorrect / (float)(incorrect+correct);
         }
 
         public void CascadeParityCheck(SimulatedUser userA, SimulatedUser userB)
@@ -418,10 +435,16 @@ namespace B84
                 output.Add(bits[i]);
             }
 
+    
+            return output;
+        }
+
+        public void QBERRemove(List<int> publicList)
+        {
             //a publikusan megoszotott biteket eldobjuk
             List<int> newBits = new List<int>();
             List<string> newBases = new List<string>();
-            for (int i=0; i<bases.Count; i++)
+            for (int i = 0; i < bases.Count; i++)
             {
                 if (!publicList.Contains(i))
                 {
@@ -431,8 +454,6 @@ namespace B84
             }
             bits = newBits;
             bases = newBases;
-
-            return output;
         }
 
         public List<int> RangeParity(int groupSize, List<int> orderList)

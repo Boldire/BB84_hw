@@ -58,6 +58,7 @@
             this.chkEavesActive.TabIndex = 0;
             this.chkEavesActive.Text = "Lehallgató";
             this.chkEavesActive.UseVisualStyleBackColor = true;
+            this.chkEavesActive.CheckedChanged += new System.EventHandler(this.chkEavesActive_CheckedChanged);
             // 
             // btnGenerate
             // 
@@ -87,6 +88,7 @@
             this.btnRunAll.TabIndex = 3;
             this.btnRunAll.Text = "Teljes futtatás";
             this.btnRunAll.UseVisualStyleBackColor = true;
+            this.btnRunAll.Click += new System.EventHandler(this.btnRunAll_Click);
             // 
             // txtSenderBits
             // 
@@ -100,9 +102,10 @@
             this.labelSenderBits.AutoSize = true;
             this.labelSenderBits.Location = new System.Drawing.Point(19, 108);
             this.labelSenderBits.Name = "labelSenderBits";
-            this.labelSenderBits.Size = new System.Drawing.Size(58, 13);
+            this.labelSenderBits.Size = new System.Drawing.Size(54, 13);
             this.labelSenderBits.TabIndex = 5;
-            this.labelSenderBits.Text = "Küldő bitjei";
+            this.labelSenderBits.Text = "Alice bitjei";
+            this.labelSenderBits.Click += new System.EventHandler(this.labelSenderBits_Click);
             // 
             // txtSenderBases
             // 
@@ -116,9 +119,9 @@
             this.labelSenderBases.AutoSize = true;
             this.labelSenderBases.Location = new System.Drawing.Point(171, 108);
             this.labelSenderBases.Name = "labelSenderBases";
-            this.labelSenderBases.Size = new System.Drawing.Size(69, 13);
+            this.labelSenderBases.Size = new System.Drawing.Size(65, 13);
             this.labelSenderBases.TabIndex = 7;
-            this.labelSenderBases.Text = "Küldő bázisai";
+            this.labelSenderBases.Text = "Alice bázisai";
             // 
             // txtRecieverBases
             // 
@@ -132,9 +135,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(318, 108);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(67, 13);
+            this.label1.Size = new System.Drawing.Size(61, 13);
             this.label1.TabIndex = 9;
-            this.label1.Text = "Vevő bázisai";
+            this.label1.Text = "Bob bázisai";
             // 
             // lblStepDescription
             // 
@@ -160,6 +163,7 @@
             // 
             this.dgvSimulation.AllowUserToAddRows = false;
             this.dgvSimulation.AllowUserToDeleteRows = false;
+            this.dgvSimulation.BackgroundColor = System.Drawing.SystemColors.Control;
             this.dgvSimulation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSimulation.ColumnHeadersVisible = false;
             this.dgvSimulation.Location = new System.Drawing.Point(23, 182);
@@ -177,9 +181,14 @@
             0});
             this.numEavesDropper.Location = new System.Drawing.Point(22, 48);
             this.numEavesDropper.Name = "numEavesDropper";
-            this.numEavesDropper.ReadOnly = true;
             this.numEavesDropper.Size = new System.Drawing.Size(120, 20);
             this.numEavesDropper.TabIndex = 15;
+            this.numEavesDropper.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numEavesDropper.ValueChanged += new System.EventHandler(this.chkEavesActive_CheckedChanged);
             // 
             // numBitCount
             // 
