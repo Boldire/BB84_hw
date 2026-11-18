@@ -187,58 +187,113 @@ namespace B84
                 dgvSimulation.Columns[i + 1].Width = 35;
             }
 
-            // 1. lépés után: Alice adatai és polarizáció
+            //1. lépés: Alice adatai és polarizáció
             if (sim.stepCount >= 1 || sim.stepCount == -1)
             {
+                string[] bitPosition = new string[n];
+                for (int i = 0; i<n; i++)
+                {
+                    bitPosition[i] = Convert.ToString(i + 1);
+                }
+                AddRow("Bit sorszáma", bitPosition);
                 AddRow("Alice bitjei", sim.InitialAliceBits.Select(b => b.ToString()).ToArray());
                 AddRow("Alice bázisai", sim.InitialAliceBases.ToArray());
-                    
+            }
+
+            //2. lépés: Alice elküldi a qubitokat
+            if (sim.stepCount >= 2 || sim.stepCount == -1)
+            {
                 string[] arrows = new string[n];
                 for (int i = 0; i < n; i++)
                     arrows[i] = GetPolarizationArrow(sim.InitialAliceBits[i], sim.InitialAliceBases[i]);
                 AddRow("Küldött polarizáció", arrows);
-                ////////////////////////////////////
-                string[] dummylist = new string[(int) numBitCount.Value];
-                for (int i = 0; i < numBitCount.Value; i++) 
+            }
+
+            //3. lépés: Eve lehallgatja a csatornát
+            if (sim.stepCount >= 3 || sim.stepCount == -1)
+            {
+                string[] dummylist = new string[(int)numBitCount.Value];
+                for (int i = 0; i < numBitCount.Value; i++)
                 {
-                    dummylist[i] = "+";
+                    dummylist[i] = " ";
                 }
                 int rowindex = AddRow("Eve által lehallgatot bitek:", dummylist);
-                foreach (int i in sim.channel.eavesdropped) 
+                foreach (int i in sim.channel.eavesdropped)
                 {
                     dgvSimulation.Rows[rowindex].Cells[i + 1].Style.BackColor = Color.Red;
+                    dgvSimulation.Rows[rowindex].Cells[i + 1].Value = "X";
                 }
             }
 
-            // 4. lépés után: Bob adatai
+            //4. lépés: Bob adatai
             if (sim.stepCount >= 4 || sim.stepCount == -1)
             {
                 AddRow("Bob bázisai", sim.InitialBobBases.ToArray());
                 AddRow("Bob mért bitjei", sim.InitialBobBits.Select(b => b.ToString()).ToArray());
-                
             }
 
-            // 5. lépés után: Bázisegyeztetés
+            //5. lépés: Bázisegyeztetés
             if (sim.stepCount >= 5 || sim.stepCount == -1)
             {
                 string[] matchRow = new string[n];
                 for (int i = 0; i < n; i++)
-                    matchRow[i] = sim.SharedIndices.Contains(i) ? "OK" : "-";
+                    matchRow[i] = (sim.SharedIndices.Contains(i)|| sim.validatorBitSpots.Contains(i)) ? "OK" : "-";
 
                 int rowIndex = AddRow("Bázisegyeztetés", matchRow);
                 for (int i = 0; i < n; i++)
                 {
-                    if (sim.SharedIndices.Contains(i))
+                    if (sim.SharedIndices.Contains(i) || sim.validatorBitSpots.Contains(i))
                         dgvSimulation.Rows[rowIndex].Cells[i + 1].Style.BackColor = Color.LightGreen;
                 }
             }
 
-            // Végeredmény kiírása
+            //6. lépés: bitek beáldozása (publikussá tevése) validálás érdekében
             if (sim.stepCount >= 6 || sim.stepCount == -1)
+            {
+                string[] matchRow = new string[n];
+                for (int i = 0; i < n; i++)
+                    matchRow[i] = sim.validatorBitSpots.Contains(i) ? "OK" : "-";
+
+                int rowIndex = AddRow("Publikus bitek", matchRow);
+                for (int i = 0; i < n; i++)
+                {
+                    if (sim.validatorBitSpots.Contains(i))
+                    {
+                        dgvSimulation.Rows[rowIndex].Cells[i + 1].Style.BackColor = Color.LightBlue;
+                        if (sim.InitialAliceBits[i] != sim.InitialBobBits[i])
+                        {
+                            dgvSimulation.Rows[rowIndex].Cells[i + 1].Style.BackColor = Color.Orange;
+                            dgvSimulation.Rows[rowIndex].Cells[i + 1].Value = "ERR";
+                        }
+                    }
+                }
+            }
+
+            //7. lépés: hibajavítás
+            if (sim.stepCount >= 7 && sim.stepCount != -1)
+            {
+                int rowIndex1 = AddRow("Alice megtartott bitjei", sim.InitialAliceBits.Select(b => b.ToString()).ToArray());
+                int rowIndex2 = AddRow("Bob megtartott bitjei", sim.InitialBobBits.Select(b => b.ToString()).ToArray());
+                int rowIndex3 = AddRow("Bob javított bitjei", sim.CorrectedBobBits.Select(b => b.ToString()).ToArray());
+                for (int i = 0; i < n; i++)
+                {
+                    if (!sim.SharedIndices.Contains(i) || sim.validatorBitSpots.Contains(i))
+                    {
+                        dgvSimulation.Rows[rowIndex1].Cells[i + 1].Value = "-";
+                        dgvSimulation.Rows[rowIndex2].Cells[i + 1].Value = "-";
+                        dgvSimulation.Rows[rowIndex3].Cells[i + 1].Value = "-";
+                    } else if (sim.InitialAliceBits[i] != sim.InitialBobBits[i])
+                        dgvSimulation.Rows[rowIndex3].Cells[i + 1].Style.BackColor = Color.Yellow;
+                }
+            }
+
+            //8. lépés: megvan a kulcsunk
+            // Végeredmény kiírása
+            if (sim.stepCount >= 8 || sim.stepCount == -1)
             {
                 if (sim.stepCount == -1)
                 {
-                    lblResult.Text = $"RIASZTÁS: Lehallgatás észlelve! QBER hibaarány: {sim.LastQBER * 100:0.0}% (megengedett max: 20%).\nA kulcscsere megszakítva!";
+                    lblResult.Text = $"Szimuátor leállt!\nA kulcscsere megszakítva!\n";
                     lblResult.ForeColor = Color.DarkRed;
                 }
                 else
